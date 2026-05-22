@@ -28,11 +28,11 @@ export function GlobalFilters({ filters, managers, onChange }: Props) {
             </button>
           ))}
         </div>
-        <label className="flex items-center gap-2 rounded-xl border border-line bg-board px-3 py-2 text-sm text-muted">
+        <label className="grid min-w-0 grid-cols-[auto_1fr] items-center gap-x-2 gap-y-2 rounded-xl border border-line bg-board px-3 py-2 text-sm text-muted sm:flex">
           <CalendarRange size={16} />
           <input className="min-w-0 bg-transparent outline-none" type="date" value={filters.startDate} onChange={(e) => onChange({ ...filters, preset: "custom", startDate: e.target.value })} />
-          <span>—</span>
-          <input className="min-w-0 bg-transparent outline-none" type="date" value={filters.endDate} onChange={(e) => onChange({ ...filters, preset: "custom", endDate: e.target.value })} />
+          <span className="hidden sm:inline">—</span>
+          <input className="col-start-2 min-w-0 bg-transparent outline-none sm:col-auto" type="date" value={filters.endDate} onChange={(e) => onChange({ ...filters, preset: "custom", endDate: e.target.value })} />
         </label>
         <label className="flex items-center gap-2 rounded-xl border border-line bg-board px-3 py-2 text-sm text-muted">
           <Search size={16} />

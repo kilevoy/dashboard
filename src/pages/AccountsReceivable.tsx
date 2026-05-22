@@ -16,7 +16,7 @@ export function AccountsReceivable({ orders }: { orders: Order[] }) {
   return (
     <div className="space-y-6">
       <div className="grid gap-5 xl:grid-cols-2">
-        <ChartCard title="Aging buckets">
+        <ChartCard title="Структура просрочки по срокам">
           <BarChart data={buckets}>
             <CartesianGrid stroke="#E6EAF0" vertical={false} />
             <XAxis dataKey="name" />
@@ -59,7 +59,7 @@ export function AccountsReceivable({ orders }: { orders: Order[] }) {
           { key: "client", header: "Клиент" },
           { key: "region", header: "Регион" },
           { key: "overdueDebt", header: "Просрочка", align: "right", render: (row) => formatRub(row.overdueDebt), sort: (row) => row.overdueDebt },
-          { key: "bucket", header: "Aging", render: (row) => <Badge tone={row.bucket === "90+ дней" ? "bad" : row.bucket === "61–90 дней" ? "warning" : "neutral"}>{row.bucket}</Badge> },
+          { key: "bucket", header: "Срок просрочки", render: (row) => <Badge tone={row.bucket === "90+ дней" ? "bad" : row.bucket === "61–90 дней" ? "warning" : "neutral"}>{row.bucket}</Badge> },
           { key: "riskScore", header: "Риск", align: "right", render: (row) => <Badge tone={row.riskScore > 55 ? "bad" : row.riskScore > 25 ? "warning" : "good"}>{row.riskScore}</Badge>, sort: (row) => row.riskScore },
           { key: "lastPurchase", header: "Последняя покупка" },
         ]}

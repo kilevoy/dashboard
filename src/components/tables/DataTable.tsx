@@ -1,5 +1,5 @@
 import { Download, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardHeader, EmptyState } from "../ui/Card";
 
 export interface Column<T> {
@@ -37,9 +37,17 @@ function exportCsv<T>(rows: T[], columns: Column<T>[], filename: string) {
 }
 
 export function DataTable<T extends object>({ title, rows, columns, filename = "export.csv" }: { title: string; rows: T[]; columns: Column<T>[]; filename?: string }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState(String(columns[0]?.key ?? ""));
   const [direction, setDirection] = useState<"asc" | "desc">("desc");
+
+  useEffect(() => {
+    setQuery("");
+    setSortKey(String(columns[0]?.key ?? ""));
+    setDirection("desc");
+    if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+  }, [columns, filename, title]);
   const visibleRows = useMemo(() => {
     const normalized = query.toLowerCase();
     const filtered = normalized ? rows.filter((row) => JSON.stringify(row).toLowerCase().includes(normalized)) : rows;
@@ -72,12 +80,12 @@ export function DataTable<T extends object>({ title, rows, columns, filename = "
         </label>
       </div>
       {visibleRows.length ? (
-        <div className="overflow-x-auto">
+        <div ref={scrollRef} className="overflow-x-auto">
           <table className="w-full min-w-[860px] text-sm">
             <thead className="bg-board text-xs uppercase tracking-[0.06em] text-muted">
               <tr>
                 {columns.map((column) => (
-                  <th key={String(column.key)} className={`px-4 py-3 font700 font-semibold ${column.align === "right" ? "text-right" : "text-left"}`}>
+                  <th key={String(column.key)} className={`px-4 py-3 font-semibold ${column.align === "right" ? "text-right" : "text-left"}`}>
                     <button
                       onClick={() => {
                         setSortKey(String(column.key));

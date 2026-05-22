@@ -11,7 +11,7 @@ export function KpiCard({ metric, icon }: { metric: KpiMetric; icon: ReactNode }
         <div className="rounded-xl bg-board p-2 text-navy">{icon}</div>
         {metric.delta ? (
           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${isBad ? "bg-red-50 text-danger" : isGood ? "bg-emerald-50 text-mint" : "bg-slate-100 text-muted"}`}>
-            {isBad ? <ArrowDownRight size={14} /> : <ArrowUpRight size={14} />}
+            {isBad ? <ArrowDownRight size={14} /> : isGood ? <ArrowUpRight size={14} /> : null}
             {metric.delta}
           </span>
         ) : null}

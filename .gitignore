@@ -7,6 +7,9 @@ dist/
 Thumbs.db
 .playwright-mcp/
 dashboard-overview*.png
+dashboard-check-*.png
+dashboard-final-*.png
+qa-*.png
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts

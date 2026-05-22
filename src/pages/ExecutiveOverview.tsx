@@ -5,16 +5,17 @@ import { aggregateOrders, calculateSummary, clientRows, planByManager, revenueBy
 import { buildInsights } from "../domain/analytics";
 import { buildRiskAlerts } from "../domain/riskScoring";
 import { formatCompactRub, formatNumber, formatPercent, formatRub } from "../utils/formatters";
-import { monthLabel } from "../utils/dates";
+import { iso, monthKey, monthLabel, TODAY } from "../utils/dates";
 import { KpiCard } from "../components/kpi/KpiCard";
 import { ChartCard } from "../components/charts/ChartCard";
 import { InsightsPanel, RiskAlertsPanel } from "../components/insights/InsightsPanel";
 import { DataTable } from "../components/tables/DataTable";
 import { Badge } from "../components/ui/Card";
 
-export function ExecutiveOverview({ orders, inventory, managers }: { orders: Order[]; inventory: InventoryItem[]; managers: Manager[] }) {
+export function ExecutiveOverview({ orders, comparisonOrders, inventory, managers }: { orders: Order[]; comparisonOrders: Order[]; inventory: InventoryItem[]; managers: Manager[] }) {
   const summary = calculateSummary(orders, inventory, managers);
   const months = revenueByMonth(orders).map((item) => ({ ...item, label: monthLabel(item.month) }));
+  const period = buildPeriodComparison(comparisonOrders);
   const regions = aggregateOrders(orders, "region").slice(0, 8);
   const clients = clientRows(orders);
   const groups = aggregateOrders(orders, "product_group").slice(0, 8);
@@ -23,11 +24,11 @@ export function ExecutiveOverview({ orders, inventory, managers }: { orders: Ord
   const insights = buildInsights(orders, inventory, managers);
   const alerts = buildRiskAlerts(orders, inventory);
   const kpis = [
-    { label: "Выручка", value: formatCompactRub(summary.revenue), delta: "+14,8%", tone: "good" as const, icon: <TrendingUp size={20} /> },
-    { label: "Валовая прибыль", value: formatCompactRub(summary.grossProfit), delta: "+11,2%", tone: "good" as const, icon: <Banknote size={20} /> },
-    { label: "Маржинальность", value: formatPercent(summary.marginPct), delta: summary.marginPct > 0.22 ? "+1,4 п.п." : "-2,1 п.п.", tone: summary.marginPct > 0.22 ? "good" as const : "warning" as const, icon: <Percent size={20} /> },
-    { label: "Активные клиенты", value: formatNumber(summary.activeClients), delta: "+7", tone: "good" as const, icon: <Users size={20} /> },
-    { label: "Средний чек", value: formatCompactRub(summary.averageOrderValue), delta: "+6,5%", tone: "good" as const, icon: <Receipt size={20} /> },
+    { label: "Выручка", value: formatCompactRub(summary.revenue), delta: period.revenueDelta.label, tone: period.revenueDelta.tone, icon: <TrendingUp size={20} /> },
+    { label: "Валовая прибыль", value: formatCompactRub(summary.grossProfit), delta: period.grossProfitDelta.label, tone: period.grossProfitDelta.tone, icon: <Banknote size={20} /> },
+    { label: "Маржинальность", value: formatPercent(summary.marginPct), delta: period.marginDelta.label, tone: period.marginDelta.tone, icon: <Percent size={20} /> },
+    { label: "Активные клиенты", value: formatNumber(summary.activeClients), delta: period.clientsDelta.label, tone: period.clientsDelta.tone, icon: <Users size={20} /> },
+    { label: "Средний чек", value: formatCompactRub(summary.averageOrderValue), delta: period.averageOrderDelta.label, tone: period.averageOrderDelta.tone, icon: <Receipt size={20} /> },
     { label: "Просроченная дебиторка", value: formatCompactRub(summary.overdueDebt), delta: formatPercent(summary.overdueDebt / Math.max(1, summary.revenue)), tone: summary.overdueDebt / Math.max(1, summary.revenue) > 0.12 ? "bad" as const : "warning" as const, icon: <Banknote size={20} /> },
     { label: "Выполнение плана", value: formatPercent(summary.planCompletionPct), delta: summary.planCompletionPct > 1 ? "выше плана" : "ниже плана", tone: summary.planCompletionPct > 1 ? "good" as const : "warning" as const, icon: <Target size={20} /> },
     { label: "Оборачиваемость склада", value: `${summary.inventoryTurnover.toFixed(1)}x`, delta: `${Math.round(summary.dso)} DSO`, tone: "neutral" as const, icon: <Boxes size={20} /> },
@@ -122,4 +123,45 @@ export function ExecutiveOverview({ orders, inventory, managers }: { orders: Ord
       />
     </div>
   );
+}
+
+function buildPeriodComparison(orders: Order[]) {
+  const currentMonth = monthKey(iso(TODAY));
+  const months = revenueByMonth(orders).filter((item) => item.month !== currentMonth);
+  const current = months.at(-1);
+  const previous = current ? months.find((item) => item.month === `${Number(current.month.slice(0, 4)) - 1}${current.month.slice(4)}`) : undefined;
+  const currentOrders = current ? orders.filter((order) => monthKey(order.order_date) === current.month) : [];
+  const previousOrders = previous ? orders.filter((order) => monthKey(order.order_date) === previous.month) : [];
+  const currentClients = new Set(currentOrders.map((order) => order.client_id)).size;
+  const previousClients = new Set(previousOrders.map((order) => order.client_id)).size;
+
+  return {
+    revenueDelta: percentDelta(current?.revenue ?? 0, previous?.revenue ?? 0),
+    grossProfitDelta: percentDelta(current?.grossProfit ?? 0, previous?.grossProfit ?? 0),
+    marginDelta: ppDelta(current?.marginPct ?? 0, previous?.marginPct ?? 0),
+    clientsDelta: countDelta(currentClients, previousClients),
+    averageOrderDelta: percentDelta(current?.averageOrderValue ?? 0, previous?.averageOrderValue ?? 0),
+  };
+}
+
+function percentDelta(current: number, previous: number) {
+  if (!previous) return { label: "YoY нет базы", tone: "neutral" as const };
+  const value = (current - previous) / previous;
+  return { label: `${signed(formatPercent(value))} YoY`, tone: value >= 0 ? ("good" as const) : ("warning" as const) };
+}
+
+function ppDelta(current: number, previous: number) {
+  const value = (current - previous) * 100;
+  const formatted = `${value >= 0 ? "+" : ""}${value.toLocaleString("ru-RU", { maximumFractionDigits: 1 })} п.п. YoY`;
+  return { label: formatted, tone: value >= 0 ? ("good" as const) : ("warning" as const) };
+}
+
+function countDelta(current: number, previous: number) {
+  const value = current - previous;
+  if (!previous) return { label: "YoY нет базы", tone: "neutral" as const };
+  return { label: `${value >= 0 ? "+" : ""}${formatNumber(value)} YoY`, tone: value >= 0 ? ("good" as const) : ("warning" as const) };
+}
+
+function signed(value: string) {
+  return value.startsWith("-") ? value : `+${value}`;
 }

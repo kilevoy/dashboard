@@ -1,6 +1,6 @@
 import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 
-export const TODAY = new Date("2026-05-21T12:00:00+05:00");
+export const TODAY = new Date("2026-05-22T12:00:00+05:00");
 
 export const iso = (date: Date) => format(date, "yyyy-MM-dd");
 

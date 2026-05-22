@@ -34,6 +34,7 @@ export default function App() {
   const [page, setPage] = useState<PageId>("overview");
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const orders = useMemo(() => filterOrders(demoData.orders, filters), [filters]);
+  const comparisonOrders = useMemo(() => filterOrders(demoData.orders, { ...filters, startDate: "2024-01-01" }), [filters]);
   const inventory = useMemo(() => filterInventory(demoData.inventory, filters), [filters]);
   const summary = calculateSummary(orders, inventory, demoData.managers);
   const insights = buildInsights(orders, inventory, demoData.managers);
@@ -44,7 +45,7 @@ export default function App() {
       <div className="mx-auto max-w-[1640px] space-y-6">
         <ExecutiveSummary report={report} ordersCount={orders.length} />
         <GlobalFilters filters={filters} managers={demoData.managers.map((manager) => manager.manager_name)} onChange={setFilters} />
-        {page === "overview" ? <ExecutiveOverview orders={orders} inventory={inventory} managers={demoData.managers} /> : null}
+        {page === "overview" ? <ExecutiveOverview orders={orders} comparisonOrders={comparisonOrders} inventory={inventory} managers={demoData.managers} /> : null}
         {page === "sales" ? <SalesAnalytics orders={orders} /> : null}
         {page === "clients" ? <ClientsAnalysis orders={orders} /> : null}
         {page === "products" ? <ProductAnalytics orders={orders} inventory={inventory} /> : null}
@@ -63,7 +64,7 @@ function ExecutiveSummary({ report, ordersCount }: { report: string; ordersCount
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/70">Панель руководителя</p>
-          <h2 className="mt-2 font-display text-2xl font-bold md:text-4xl">Управление продажами, маржей и складом в одном срезе</h2>
+          <h2 className="mt-2 font-display text-2xl font-bold md:text-4xl">Продажи, маржа, склад и дебиторка в одном управленческом срезе</h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-white/78">
             В текущем фильтре анализируется {ordersCount.toLocaleString("ru-RU")} заказных строк. Dashboard помогает увидеть вклад регионов, клиентов, менеджеров, товарных групп и дебиторки без ручной сборки Excel-отчетов.
           </p>

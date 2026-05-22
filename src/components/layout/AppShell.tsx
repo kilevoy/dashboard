@@ -23,7 +23,7 @@ export function AppShell({ page, setPage, children, report }: { page: PageId; se
           </div>
           <div>
             <p className="font-display text-sm font-bold text-ink">Auto Parts BI</p>
-            <p className="text-xs text-muted">Продажи · Склад · Дебиторка</p>
+            <p className="text-xs text-muted">Продажи · Маржа · Склад · Дебиторка</p>
           </div>
         </div>
         <nav className="mt-8 space-y-1">
@@ -44,7 +44,7 @@ export function AppShell({ page, setPage, children, report }: { page: PageId; se
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber">Портфолио-дашборд</p>
-              <h1 className="font-display text-2xl font-bold text-ink md:text-3xl">B2B-аналитика продаж, склада и дебиторки</h1>
+              <h1 className="font-display text-2xl font-bold text-ink md:text-3xl">B2B-аналитика продаж, маржи, склада и дебиторки</h1>
             </div>
             <div className="flex items-center gap-3">
               <div className="hidden items-center gap-2 rounded-xl border border-line bg-board px-3 py-2 text-sm text-muted md:flex">

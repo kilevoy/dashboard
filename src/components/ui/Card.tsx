@@ -23,7 +23,7 @@ export function Badge({ children, tone = "neutral" }: { children: ReactNode; ton
     warning: "bg-amber-50 text-amber-700",
     bad: "bg-red-50 text-red-700",
   };
-  return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font700 font-semibold ${tones[tone]}`}>{children}</span>;
+  return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${tones[tone]}`}>{children}</span>;
 }
 
 export function EmptyState({ title = "Нет данных", text = "Измените фильтры или период." }) {
