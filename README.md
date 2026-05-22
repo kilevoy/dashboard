@@ -73,16 +73,15 @@ npm run build
 
 ## Публикация на GitHub Pages
 
-1. Создать репозиторий на GitHub.
-2. Загрузить проект в репозиторий.
-3. Установить зависимости.
-4. Выполнить:
+Публикация настроена через GitHub Actions. После push в `main` workflow `.github/workflows/pages.yml`:
 
-```bash
-npm run deploy
-```
+- устанавливает зависимости через `npm ci`;
+- собирает проект командой `npm run build`;
+- публикует содержимое `dist` в GitHub Pages.
 
-В `vite.config.ts` указан `base: "./"`, поэтому сборка готова для GitHub Pages.
+В настройках репозитория нужно выбрать `Settings -> Pages -> Build and deployment -> Source: GitHub Actions`.
+
+В `vite.config.ts` указан `base: "./"`, поэтому сборка подходит для GitHub Pages.
 
 ## Как я бы использовал этот dashboard в реальной компании
 
