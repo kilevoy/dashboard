@@ -35,7 +35,7 @@ jobs:
         run: npm run build
 
       - name: Настроить GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Подготовить артефакт Pages
         uses: actions/upload-pages-artifact@v3
